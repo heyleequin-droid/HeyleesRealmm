@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Crown,
@@ -53,7 +53,7 @@ const Card = ({ tier, color, glow, icon: Icon, questions }) => {
       whileHover={{ scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
       onClick={() => setFlipped((prev) => !prev)}
-      aria-label={`${tier} card`}
+      aria-label={`Flip to reveal ${tier} tier prompt`}
     >
       <AnimatePresence mode="wait" initial={false}>
         {!flipped ? (
@@ -88,6 +88,7 @@ const Card = ({ tier, color, glow, icon: Icon, questions }) => {
             <p className="text-xl font-medium leading-relaxed">{questions[index]}</p>
             <button
               type="button"
+              aria-label="Shuffle question"
               className="inline-flex w-fit items-center gap-2 rounded-full border border-white/50 px-3 py-1 text-sm"
               onClick={shuffle}
             >
@@ -112,13 +113,17 @@ export default function App() {
     { id: 2, user: 'Guest88', text: 'Is the Gold tier actually secret??' },
   ]);
   const [input, setInput] = useState('');
-  const [nextMessageId, setNextMessageId] = useState(3);
+  const idFallbackCounter = useRef(0);
+
+  const createMessageId = () =>
+    typeof crypto !== 'undefined' && crypto.randomUUID
+      ? crypto.randomUUID()
+      : `${Date.now()}-${idFallbackCounter.current++}`;
 
   const sendMessage = () => {
     const text = input.trim();
     if (!text) return;
-    setMessages((prev) => [...prev, { id: nextMessageId, user: 'You', text, admin: false }]);
-    setNextMessageId((prev) => prev + 1);
+    setMessages((prev) => [...prev, { id: createMessageId(), user: 'You', text, admin: false }]);
     setInput('');
   };
 
@@ -192,7 +197,13 @@ export default function App() {
             </div>
           </div>
 
-          <div className="mb-4 max-h-72 space-y-3 overflow-auto rounded-xl bg-black/20 p-3">
+          <div
+            className="mb-4 max-h-72 space-y-3 overflow-auto rounded-xl bg-black/20 p-3"
+            role="log"
+            aria-live="polite"
+            aria-relevant="additions text"
+            aria-label="Chat message history"
+          >
             {messages.map((message) => (
               <div
                 key={message.id}
@@ -203,7 +214,11 @@ export default function App() {
                 }`}
               >
                 <p className="mb-1 flex items-center gap-2 text-xs uppercase tracking-[0.18em] text-slate-300">
-                  {message.admin ? <Crown className="h-3.5 w-3.5" /> : <User className="h-3.5 w-3.5" />}
+                  {message.admin ? (
+                    <Crown className="h-3.5 w-3.5" aria-hidden="true" />
+                  ) : (
+                    <User className="h-3.5 w-3.5" aria-hidden="true" />
+                  )}
                   {message.user}
                 </p>
                 <p className="text-sm text-slate-100">{message.text}</p>
@@ -213,10 +228,11 @@ export default function App() {
 
           <div className="flex gap-2">
             <input
+              aria-label="Chat message"
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => {
-                if (e.key === 'Enter' && !e.shiftKey && !e.nativeEvent.isComposing) {
+                if (e.key === 'Enter' && !e.isComposing) {
                   e.preventDefault();
                   sendMessage();
                 }
@@ -226,6 +242,7 @@ export default function App() {
             />
             <button
               type="button"
+              aria-label="Send message"
               onClick={sendMessage}
               className="inline-flex items-center gap-2 rounded-xl bg-pink-600 px-4 py-2 font-medium text-white hover:bg-pink-500"
             >
