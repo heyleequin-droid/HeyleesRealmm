@@ -112,10 +112,13 @@ export default function App() {
     { id: 2, user: 'Guest88', text: 'Is the Gold tier actually secret??' },
   ]);
   const [input, setInput] = useState('');
+  const [nextMessageId, setNextMessageId] = useState(3);
 
   const sendMessage = () => {
-    if (!input.trim()) return;
-    setMessages([...messages, { id: Date.now(), user: 'You', text: input.trim(), admin: false }]);
+    const text = input.trim();
+    if (!text) return;
+    setMessages((prev) => [...prev, { id: nextMessageId, user: 'You', text, admin: false }]);
+    setNextMessageId((prev) => prev + 1);
     setInput('');
   };
 
@@ -183,9 +186,9 @@ export default function App() {
               <h2 className="text-xl font-semibold">Private Booth Chat</h2>
             </div>
             <div className="flex items-center gap-4 text-slate-400">
-              <Instagram className="h-4 w-4" aria-label="Instagram" />
-              <Globe className="h-4 w-4" aria-label="Website" />
-              <ShoppingBag className="h-4 w-4" aria-label="Shop" />
+              <Instagram className="h-4 w-4" aria-hidden="true" />
+              <Globe className="h-4 w-4" aria-hidden="true" />
+              <ShoppingBag className="h-4 w-4" aria-hidden="true" />
             </div>
           </div>
 
@@ -213,7 +216,10 @@ export default function App() {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => {
-                if (e.key === 'Enter') sendMessage();
+                if (e.key === 'Enter' && !e.shiftKey && !e.nativeEvent.isComposing) {
+                  e.preventDefault();
+                  sendMessage();
+                }
               }}
               placeholder="Send a message..."
               className="w-full rounded-xl border border-white/15 bg-slate-950/80 px-4 py-2 outline-none ring-pink-400/50 placeholder:text-slate-500 focus:ring"
