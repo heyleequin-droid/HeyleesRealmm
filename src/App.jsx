@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Crown, Flame, Sparkles, Zap, ShieldCheck } from 'lucide-react';
+import { Crown, Flame, Sparkles, Zap, ShieldCheck, RefreshCw } from 'lucide-react';
+
+const AnimatedCard = motion.div;
 
 const QUESTIONS = {
   Copper: ["What's your biggest guilty pleasure?", "First thing you notice in a room?", "Most naughty thing in public?", "What's a fashion choice that's a turn-on?"],
@@ -19,7 +21,7 @@ const VaultCard = ({ tier, color, glow, icon: Icon }) => {
 
   return (
     <div style={{ perspective: '1200px', margin: '15px' }}>
-      <motion.div
+      <AnimatedCard
         onClick={() => setFlipped(!flipped)}
         animate={{ rotateY: flipped ? 180 : 0 }}
         style={{ width: '280px', height: '400px', position: 'relative', transformStyle: 'preserve-3d', cursor: 'pointer' }}
@@ -54,11 +56,11 @@ const VaultCard = ({ tier, color, glow, icon: Icon }) => {
           <p style={{ color: 'white', fontSize: '19px', fontFamily: 'serif', fontStyle: 'italic', lineHeight: '1.4' }}>
             &ldquo;{QUESTIONS[tier][index]}&rdquo;
           </p>
-          <button onClick={shuffle} style={{ marginTop: '20px', background: 'none', border: `1px solid ${color}`, color: color, padding: '5px 15px', borderRadius: '50px', fontSize: '10px', cursor: 'pointer' }}>
-            SHUFFLE
+          <button onClick={shuffle} style={{ marginTop: '20px', background: 'none', border: `1px solid ${color}`, color: color, padding: '5px 15px', borderRadius: '50px', fontSize: '10px', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+            <RefreshCw size={10} /> SHUFFLE
           </button>
         </div>
-      </motion.div>
+      </AnimatedCard>
     </div>
   );
 };
